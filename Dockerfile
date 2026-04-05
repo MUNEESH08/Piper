@@ -2,13 +2,10 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    wget \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+# Install system deps
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
-# Copy files
+# Copy code
 COPY . .
 
 # Install Python deps
@@ -20,7 +17,7 @@ RUN wget https://github.com/rhasspy/piper/releases/latest/download/piper_linux_x
     && mv piper/piper ./piper \
     && chmod +x ./piper
 
-# Download model
+# 🔥 Download model from HuggingFace
 RUN mkdir -p models && \
     wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx -O models/model.onnx && \
     wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json -O models/model.onnx.json
