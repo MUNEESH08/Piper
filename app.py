@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import subprocess
 import uuid
@@ -6,8 +7,8 @@ import os
 
 app = FastAPI()
 
-MODEL_PATH = "models/en_US-lessac-medium.onnx"
-CONFIG_PATH = "models/en_US-lessac-medium.onnx.json"
+MODEL_PATH = "models/model.onnx"
+CONFIG_PATH = "models/model.onnx.json"
 
 class TTSRequest(BaseModel):
     text: str
@@ -16,21 +17,17 @@ class TTSRequest(BaseModel):
 def generate_tts(req: TTSRequest):
     output_file = f"/tmp/{uuid.uuid4()}.wav"
 
-    command = [
-        "./piper",
-        "--model", MODEL_PATH,
-        "--config", CONFIG_PATH,
-        "--output_file", output_file
-    ]
-
     process = subprocess.Popen(
-        command,
+        [
+            "./piper",
+            "--model", MODEL_PATH,
+            "--config", CONFIG_PATH,
+            "--output_file", output_file
+        ],
         stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
         text=True
     )
 
     process.communicate(req.text)
 
-    return {"audio_path": output_file}
+    return FileResponse(output_file, media_type="audio/wav")
